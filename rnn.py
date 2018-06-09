@@ -2,9 +2,7 @@
 
 # Andy coding
 
-# Part 1 - Data Preprocessing
-
-# Importing the libraries
+# Data Preprocessing
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -21,32 +19,19 @@ training_set_scaled = sc.fit_transform(training_set)
 # Creating a data structure with 60 timesteps and 1 output
 X_train = []
 y_train = []
-for i in range(60, 1258):
-    X_train.append(training_set_scaled[i-60:i, 0])
+for i in range(20, 1258):
+    X_train.append(training_set_scaled[i-20:i, 0])
     y_train.append(training_set_scaled[i, 0])
 X_train, y_train = np.array(X_train), np.array(y_train)
 
-'''Andy's method
-# Creating a data structure with 60 timesteps and 1 output
-X_train = []
-y_train = []
-n_future = 20
-n_past = 60
- 
-for i in range(n_past, len(training_set_scaled)-n_future+1):
-    X_train.append(training_set_scaled[i-n_past:i, 0:5])
-    y_train.append(training_set_scaled[i:i+n_future, 0])
- 
-X_train, y_train = np.array(X_train), np.array(y_train)'''
 
 # Reshaping
-# For adding more dimension (other indicator in addition to open price) if needed
+# For adding more dimension (or other indicator in addition to open price) if needed
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
-#dimension can be found in keras doc -> recurrent layer ->
-                        #input shape [bacth_size, timestep, # predictors]
+#dimension can be found in keras doc -> recurrent layer -> input shape [bacth_size, timestep, # predictors]
 
 
-# Part 2 - Building the RNN
+# Building the RNN
 
 # Importing the Keras libraries and packages
 from keras.models import Sequential
@@ -86,7 +71,7 @@ regressor.fit(X_train, y_train, epochs = 100, batch_size = 32)
 
 
 
-# Part 3 - Making the predictions and visualising the results
+# Predictions and visualising the results
 
 # Getting the real stock price of 2017
 dataset_test = pd.read_csv('Google_Stock_Price_Test.csv')
@@ -94,12 +79,10 @@ real_stock_price = dataset_test.iloc[:, 1:2].values
 
 # Getting the predicted stock price of 2017
 dataset_total = pd.concat((dataset_train['Open'], dataset_test['Open']), axis = 0)
-inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
-inputs1 = inputs.reshape(-1,1)
-inputs = sc.transform(inputs)
+inputs = sc.fit_transform(dataset_total)
 X_test = []
-for i in range(60, 80):
-    X_test.append(inputs1[i-60:i, 0])
+for i in range(1258, 1278):
+    X_test.append(inputs[i-20:i, 0])
 X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 predicted_stock_price = regressor.predict(X_test)
